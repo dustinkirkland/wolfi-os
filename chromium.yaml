@@ -101,15 +101,18 @@ pipeline:
       solutions = [
         { "name"        : "src",
           "url"         : "https://chromium.googlesource.com/chromium/src.git",
+          "managed": False,
+          "custom_deps": {},
+          "custom_vars": {},
         },
       ]
       EOF
       # Fetch source -- this takes about 15 minutes, requires 6G of disk
       gclient sync --no-history
       # Generate config -- this takes about 30 minutes
-      gn gen out/Default --args="is_debug=false is_official_build=true"
+      gn gen out/Default --args="is_debug=false"
       # Building -- this will take a long time (~3 hours on a 32xCPU, 128GB system)
-      autoninja -C out/Default chrome chromedriver
+      autoninja -C out/Default chrome chromedriver chrome_sandbox
       # Install the goods
       cd out/Default
       mkdir -p ${{targets.destdir}}/usr/bin ${{targets.destdir}}/usr/lib/${{package.name}}
@@ -121,7 +124,7 @@ pipeline:
       mv snapshot_blob.bin ${{targets.destdir}}/usr/lib/${{package.name}}
       mv v8_context_snapshot.bin ${{targets.destdir}}/usr/lib/${{package.name}}
       # links
-      ln -sf ${{targets.destdir}}/usr/lib/${{package.name}}/chrome ${{targets.destdir}}/usr/bin/chromium-browser
+      ln -sf /usr/lib/${{package.name}}/chrome ${{targets.destdir}}/usr/bin/chromium-browser
       ln -sf chromium-browser ${{targets.destdir}}/usr/bin/chromium
 
   - uses: strip
