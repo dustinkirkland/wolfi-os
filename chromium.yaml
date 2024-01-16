@@ -92,10 +92,8 @@ pipeline:
       # Mostly following: https://chromium.googlesource.com/chromium/src/+/main/docs/linux/build_instructions.md
       # Initial git clone takes ~15m
       # Fetch tools -- this is pretty quick, requires 1G of disk
-      cd ..
       git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
-      export PATH="$PWD/depot_tools:$PATH"
-      cd -
+      export PATH="$PATH:$PWD/depot_tools"
       cat <<EOF > .gclient
       # Setup a .gclient config (handled by fetch in upstream instructions)
       solutions = [
