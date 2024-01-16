@@ -1,151 +1,127 @@
-# I originally started from Chromium's upstream page, on building
-# from source:
-# - https://chromium.googlesource.com/chromium/src/+/main/docs/linux/build_instructions.md
-#
-# That document is written for Ubuntu, so I started there to try and reproduce their work.
-# Note that the source fetch took ~4 hours, and the build itself took ~3 hours.
-# My build did succeed on Ubuntu, and the chrome binary was >1GB, however it segfaulted
-# when I ran it.
-#
-# So I gave up on that, and found this docker image for running a headless Chrome:
-# - https://github.com/Zenika/alpine-chrome
-#
-# This actually works for me here:
-# $ wget https://raw.githubusercontent.com/jfrazelle/dotfiles/master/etc/docker/seccomp/chrome.json
-# $ docker container run -it --rm --security-opt seccomp=$(pwd)/chrome.json zenika/alpine-chrome https://www.chromestatus.com/
-#
-# Now that's using chromium as built by Alpine.  So I tracked down Alpine's build:
-# - https://git.alpinelinux.org/aports/tree/community/chromium/APKBUILD
-#
-# This uses a release tarball, which is way faster (~7m), rather than git.
-#
-# Alpine's configuration is quite complicated, and involves a number of musl-related
-# patches, that probably isn't necessary for us.
-
 package:
   name: chromium
-  version: 120.0.6099.129
+  version: 122.0.6250.1
   epoch: 1
   description: "Open souce version of Google's chrome web browser"
   copyright:
     - license: BSD-3-Clause
-  # Based on Alpine, looks like we may need these runtime deps?
-  #dependencies:
-    #runtime:
-      #- font-opensans
-      #- gtk+3.0
-      #- icu-data-full
-      #- mesa-dri-gallium
-      #- libudev
-      #- xdg-utils
 
 environment:
   contents:
     packages:
-      # Install the following to get gn gen to run
+      - alsa-lib-dev
       - bash
+      - bison
+      - brotli-dev
+      - build-base
+      - busybox
+      - bzip2-dev
+      - ca-certificates-bundle
+      - cairo-dev
+      - cups-dev
+      - curl
+      - curl-dev
+      - dav1d-dev
+      - dbus-glib-dev
+      - elfutils
+      - elfutils-dev
+      - eudev-dev
+      - ffmpeg-dev
+      - findutils
+      - flac-dev
+      - flex
+      - freetype-dev
       - git
+      - glib-dev
+      - gn
+      - gperf
+      - gzip
+      - harfbuzz-dev
+      - hwdata-dev
+      - krb5-dev
+      - lcms2-dev
+      - libbsd-dev
+      - libcap-dev
+      - libevent-dev
+      - libffi-dev
+      - libgcrypt-dev
+      - libjpeg-turbo-dev
+      - libnss-dev
+      - libsecret-dev
+      - libusb-dev
+      - libva-dev
+      - libwebp-dev
+      - libxcomposite-dev
+      - libxcursor-dev
+      - libxdamage
+      - libxinerama-dev
+      - libxkbcommon
+      - libxml2-dev
+      - libxrandr-dev
+      - libxslt-dev
+      - libxtst
+      - linux-headers
+      - mesa-dev
+      - mesa-gbm
+      - opus-dev
+      - pango
+      - pciutils-dev
+      - perl
+      - pulseaudio-dev
+      - py3-httplib2
+      - py3-setuptools
       - python3
       - rust
-      # These are the build deps used by Alpine, that we already have in Wolfi
-      #- alsa-lib-dev
-      #- bash
-      #- bison
-      #- brotli-dev
-      #- busybox
-      #- bzip2-dev
-      #- cairo-dev
-      #- cups-dev
-      #- curl-dev
-      #- dav1d-dev
-      #- elfutils
-      #- elfutils-dev
-      #- eudev-dev
-      #- ffmpeg-dev
-      #- findutils
-      #- flac-dev
-      #- flex
-      #- freetype-dev
-      #- gn
-      #- gperf
-      #- gzip
-      #- harfbuzz-dev
-      #- hwdata-dev
-      #- krb5-dev
-      #- lcms2-dev
-      #- libbsd-dev
-      #- libcap-dev
-      #- libevent-dev
-      #- libffi-dev
-      #- libgcrypt-dev
-      #- libjpeg-turbo-dev
-      #- libsecret-dev
-      #- libusb-dev
-      #- libva-dev
-      #- libwebp-dev
-      #- libxcomposite-dev
-      #- libxcursor-dev
-      #- libxinerama-dev
-      #- libxml2-dev
-      #- libxrandr-dev
-      #- libxslt-dev
-      #- linux-headers
-      #- mesa-dev
-      #- opus-dev
-      #- pciutils-dev
-      #- perl
-      #- pulseaudio-dev
-      #- py3-httplib2-0.22.0-r1
-      #- py3-setuptools
-      #- python3
-      #- rust
-      #- samurai
-      #- speex-dev
-      #- sqlite-dev
-      #- wget
-      #- xcb-proto
-      #- zlib-dev
-      #- zstd-dev
-      # These are the build deps used by Alpine, that we DON'T have in Wolfi
-      #- bsd-compat-headers
-      #- clang-dev
-      #- compiler-rt
-      #- crc32c-dev
-      #- dbus-glib-dev
-      #- double-conversion-dev
-      #- gtk+3.0-dev
-      #- highway-dev
-      #- hunspell-dev
-      #- jpeg-dev
-      #- libevdev-dev
-      #- libexif-dev
-      #- libxscrnsaver-dev
-      #- lld
-      #- llvm
-      #- minizip-dev
-      #- nodejs-current
-      #- nss-dev
-      #- openh264-dev
-      #- pipewire-dev
-      #- qt5-qtbase-dev
+      - samurai
+      - speex-dev
+      - sqlite-dev
+      - wget
+      - xcb-proto
+      - zlib-dev
+      - zstd-dev
 
 pipeline:
-  - uses: fetch
+  - uses: git-checkout
     with:
-      uri: https://commondatastorage.googleapis.com/chromium-browser-official/chromium-${{package.version}}.tar.xz
-      expected-sha256: be36d5abecfafdc68d9b27b0bee65136316610a295e844b99483a7520b245f85
+      repository: https://chromium.googlesource.com/chromium/src.git
+      tag: ${{package.version}}
+      depth: 1
+      expected-commit: 553d92272085528d3d2c898c9263714e8ad3345b
 
   - runs: |
-      set -x
-      echo $PWD
-      export DEPOT_TOOLS_DIR="$PWD/third_party/depot_tools"
-      export PATH="$DEPOT_TOOLS_DIR:$PATH"
-      export BOOTSTRAP_PYTHON_BIN=/usr/bin/python3
-      # Looks like we need to do a gclient sync?
-      # But to do so, I think we're going to need a Google API key for Wolfi...
-      # gclient sync
-      #source $DEPOT_TOOLS_DIR/cipd_bin_setup.sh
-      #cipd_bin_setup
-      # Alpine has a lot of gn_config options here, some of which we may need...
-      gn gen out/bld
+      # Mostly following: https://chromium.googlesource.com/chromium/src/+/main/docs/linux/build_instructions.md
+      # Initial git clone takes ~15m
+      # Fetch tools -- this is pretty quick, requires 1G of disk
+      cd ..
+      git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
+      export PATH="$PWD/depot_tools:$PATH"
+      cd -
+      cat <<EOF > .gclient
+      # Setup a .gclient config (handled by fetch in upstream instructions)
+      solutions = [
+        { "name"        : "src",
+          "url"         : "https://chromium.googlesource.com/chromium/src.git",
+        },
+      ]
+      EOF
+      # Fetch source -- this takes about 15 minutes, requires 6G of disk
+      gclient sync --no-history
+      # Generate config -- this takes about 30 minutes
+      gn gen out/Default --args="is_debug=false is_official_build=true"
+      # Building -- this will take a long time (~3 hours on a 32xCPU, 128GB system)
+      autoninja -C out/Default chrome chromedriver
+      # Install the goods
+      cd out/Default
+      mkdir -p ${{targets.destdir}}/usr/bin ${{targets.destdir}}/usr/lib/${{package.name}}
+      mv *.so* ${{targets.destdir}}/usr/lib/${{package.name}}
+      mv chrome ${{targets.destdir}}/usr/lib/${{package.name}}
+      mv chrome_sandbox ${{targets.destdir}}/usr/lib/${{package.name}}
+      mv chromewebdriver ${{targets.destdir}}/usr/lib/${{package.name}}
+      # resources
+      mv snapshot_blob.bin ${{targets.destdir}}/usr/lib/${{package.name}}
+      mv v8_context_snapshot.bin ${{targets.destdir}}/usr/lib/${{package.name}}
+      # links
+      ln -sf ${{targets.destdir}}/usr/lib/${{package.name}}/chrome ${{targets.destdir}}/usr/bin/chromium-browser
+      ln -sf chromium-browser ${{targets.destdir}}/usr/bin/chromium
 
+  - uses: strip
