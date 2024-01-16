@@ -145,3 +145,12 @@ pipeline:
       ln -sf chromium-browser ${{targets.destdir}}/usr/bin/chromium
 
   - uses: strip
+
+test:
+  environment:
+    contents:
+      packages:
+        - chromium
+  pipeline:
+    - runs: |
+        chrome --no-sandbox --headless --disable-gpu --dump-dom https://www.chromestatus.com
