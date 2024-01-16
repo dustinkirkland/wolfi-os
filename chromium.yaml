@@ -135,7 +135,8 @@ pipeline:
       mv *.so* ${{targets.destdir}}/usr/lib/${{package.name}}
       mv chrome ${{targets.destdir}}/usr/lib/${{package.name}}
       mv chrome_sandbox ${{targets.destdir}}/usr/lib/${{package.name}}
-      mv chromewebdriver ${{targets.destdir}}/usr/lib/${{package.name}}
+      mv chromedriver ${{targets.destdir}}/usr/lib/${{package.name}}
+      mv icudtl.dat ${{targets.destdir}}/usr/lib/${{package.name}}
       # resources
       mv snapshot_blob.bin ${{targets.destdir}}/usr/lib/${{package.name}}
       mv v8_context_snapshot.bin ${{targets.destdir}}/usr/lib/${{package.name}}
