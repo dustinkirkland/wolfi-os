@@ -160,14 +160,12 @@ subpackages:
       - runs: |
           mkdir -p ${{targets.subpkgdir}}/usr/lib/${{package.name}}
           mv ${{targets.destdir}}/usr/lib/${{package.name}}/*qt* ${{targets.subpkgdir}}/usr/lib/${{package.name}}
-
   - name: ${{package.name}}-lang
     pipeline:
       - runs: |
           mkdir -p ${{targets.subpkgdir}}/usr/lib/${{package.name}}
           mv ${{targets.destdir}}/usr/lib/${{package.name}}/locales ${{targets.subpkgdir}}/usr/lib/${{package.name}}
 
-  - uses: strip
 
 test:
   environment:
