@@ -1,0 +1,49 @@
+package:
+  name: qemu
+  version: "8.2.2"
+  epoch: 0
+  description: "fast processor emulator"
+  copyright:
+    - license: GPL-2.0
+
+environment:
+  contents:
+    packages:
+      - bash
+      - bison
+      - build-base
+      - flex
+      - git
+      - glib
+      - glib-dev
+      - ninja-build
+      - perl
+      - python3
+      - py3-sphinx
+      - py3-pip
+      - samurai
+      - wolfi-base
+
+pipeline:
+  - uses: git-checkout
+    with:
+      repository: https://github.com/qemu/qemu
+      expected-commit: 11aa0b1ff115b86160c4d37e7c37e6a6b13b77ea
+      tag: v${{package.version}}
+
+  - runs: |
+      mkdir build
+      cd build
+      ../configure
+      # To build qemu-user-static, we're probably going to need a configure more like:
+      # - https://logan.tw/posts/2018/02/18/build-qemu-user-static-from-source-code/
+      make
+      make install
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: qemu/qemu
+    use-tag: true
