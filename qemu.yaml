@@ -16,6 +16,7 @@ environment:
       - git
       - glib
       - glib-dev
+      - glib-static
       - ninja-build
       - perl
       - python3
@@ -23,6 +24,8 @@ environment:
       - py3-pip
       - samurai
       - wolfi-base
+      - zlib-dev
+      - zlib-static
 
 pipeline:
   - uses: git-checkout
@@ -34,7 +37,7 @@ pipeline:
   - runs: |
       mkdir build
       cd build
-      ../configure
+      ../configure --static --disable-system --enable-linux-user
       # To build qemu-user-static, we're probably going to need a configure more like:
       # - https://logan.tw/posts/2018/02/18/build-qemu-user-static-from-source-code/
       make
