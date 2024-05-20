@@ -1,0 +1,45 @@
+package:
+  name: linux
+  version: "6.9.1"
+  epoch: 0
+  description: "the linux kernel"
+  copyright:
+    - license: GPL-2.0
+
+environment:
+  contents:
+    packages:
+      - bison
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+      - elfutils
+      - elfutils-dev
+      - flex
+      - openssl-dev
+      - perl
+      - wolfi-base
+
+pipeline:
+  - uses: git-checkout
+    with:
+      repository: https://github.com/gregkh/linux
+      tag: v${{package.version}}
+      expected-commit: b019fcc08127f9f9a50d19fe1ea1869607652838
+
+  - runs: |
+      # TODO: Much work to be done, tailoring a kernel config (or, more likely, a set of kernel configs)
+      # TODO: But as a starting point, let's just build a sane default, accepting all defaults
+      yes "" | make oldconfig
+      echo "CONFIG_MODULE_SIG_KEY=certs/signing_key.x509" >> .config
+      make -j $(grep -ci ^processor /proc/cpuinfo)
+
+
+update:
+  enabled: true
+  github:
+    identifier: gregkh/linux
+    use-tag: true
+    strip-prefix: v
+    tag-filter: v
+
