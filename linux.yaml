@@ -1,7 +1,7 @@
 package:
   name: linux
   version: "6.9.1"
-  epoch: 0
+  epoch: 2
   description: "the linux kernel"
   copyright:
     - license: GPL-2.0
@@ -33,7 +33,10 @@ pipeline:
       yes "" | make oldconfig
       echo "CONFIG_MODULE_SIG_KEY=certs/signing_key.x509" >> .config
       make -j $(grep -ci ^processor /proc/cpuinfo)
-
+      mkdir -p ${{targets.destdir}}/boot
+      install -Dm644 .config ${{targets.destdir}}/boot/config-${{package.version}} 
+      install -Dm600 $(find . -type f -name bzImage -print -quit) ${{targets.destdir}}/boot/vmlinuz-${{package.version}}
+      cd ${{targets.destdir}}/boot && ln -sf vmlinuz-${{package.version}} vmlinuz && cd -
 
 update:
   enabled: true
