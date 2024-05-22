@@ -70,6 +70,10 @@ pipeline:
       ( cd initramfs/rootfs && cpio --format=newc -o ) <initramfs/files | gzip --to-stdout >initramfs-${{package.version}}-${{package.epoch}}.cpio.gz
       install -Dm644 initramfs-${{package.version}}-${{package.epoch}}.cpio.gz ${{targets.destdir}}/boot/initramfs-${{package.version}}-${{package.epoch}}.cpio.gz
       ( cd ${{targets.destdir}}/boot && ln -sf initramfs-${{package.version}}-${{package.epoch}}.cpio.gz initramfs )
+      # If you "apk add linux", this pacakge will install a vmlinuz kernel and an initramfs into /boot
+      # You can then pull those two artifacts out, and run the followin to boot wolfi:
+      #   $ qemu-system-x86_64 -cpu host -enable-kvm -m 2048 -nographic -kernel ./vmlinuz -initrd ./initramfs -append "console=ttyS0"
+      # Login as "root" with password "wolfi"
 
 update:
   enabled: true
