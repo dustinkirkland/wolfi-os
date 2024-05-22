@@ -1,7 +1,7 @@
 package:
   name: linux
   version: "6.9.1"
-  epoch: 11
+  epoch: 13
   description: "the linux kernel"
   copyright:
     - license: GPL-2.0
@@ -33,7 +33,9 @@ pipeline:
       # TODO: Much work to be done, tailoring a kernel config (or, more likely, a set of kernel configs)
       # TODO: But as a starting point, let's just build a sane default, accepting all defaults
       yes "" | make oldconfig
+      make hardening.config
       echo "CONFIG_MODULE_SIG_KEY=certs/signing_key.x509" >> .config
+      # Build the Linux Kernel
       make -j $(grep -ci ^processor /proc/cpuinfo)
       mkdir -p ${{targets.destdir}}/boot
       install -Dm644 .config ${{targets.destdir}}/boot/config-${{package.version}}-${{package.epoch}}
@@ -52,20 +54,37 @@ pipeline:
           - systemd
           - wolfi-base
       EOF
+      # Generate a base wolfi tarball
       apko build-minirootfs base.yaml base.tar.gz
       mkdir -p initramfs/rootfs
+      # Extract that tarball so that we can add some configuration
       tar -C initramfs/rootfs -xvf base.tar.gz
+      # Use systemd as init pid 1
       ln -sf /usr/lib/systemd/systemd initramfs/rootfs/init
+      # Add a getty service, so that we have a terminal on the command line
       mkdir -p initramfs/rootfs/etc/systemd/system/getty@tty1.service.d/
       cat > initramfs/rootfs/etc/systemd/system/getty@tty1.service.d/override.conf <<- EOF
       [Service]
       ExecStart=
       ExecStart=-/sbin/agetty --autologin root --noclear tty1
       EOF
-      # Default password for root is "wolfi"
+      # Set the default password for root is "wolfi"
+      # TODO: This is definitely not what we want long term, but fine for proof-of-concept
       sed -i -e "s/^root:.*/root:\$6\$dOE\.PVYo\/a08l6gF\$LxXD8kZcazqMAmTqSyuSaiEfr4LF5NPbZHYYeY0351q4YzqX3pntSnEIFCj\/fAYuHUQtYBiotB20idqrnnBbh0:19865:0:::::/" initramfs/rootfs/etc/shadow
+      # Set the hostname to "wolfi" for a little lightweight branding
       echo "wolfi" > initramfs/rootfs/etc/hostname
       sed -i -e "s/\slocalhost\s/ localhost wolfi /" initramfs/rootfs/etc/hosts
+      # Setup dhcp networking
+      cat > initramfs/rootfs/etc/systemd/network/20-wired.network <<- EOF
+      [Match]
+      Name=en*
+
+      [Network]
+      DHCP=yes
+      EOF
+      # Set timezone to UTC to avoid annoying prompt at boot
+      ln -sf /usr/share/zoneinfo/UTC initramfs/rootfs/etc/localtime
+      # Archive and compress this directory structure into a cpio file for initramfs
       ( cd initramfs/rootfs && find . >../files )
       ( cd initramfs/rootfs && cpio --format=newc -o ) <initramfs/files | gzip --to-stdout >initramfs-${{package.version}}-${{package.epoch}}.cpio.gz
       install -Dm644 initramfs-${{package.version}}-${{package.epoch}}.cpio.gz ${{targets.destdir}}/boot/initramfs-${{package.version}}-${{package.epoch}}.cpio.gz
