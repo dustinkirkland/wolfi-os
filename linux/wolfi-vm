@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+set -x
+
+# Build the linux package
+make package/linux
+
+# Find the latest linux package
+pkg=$(find packages -type f -name 'linux-*' -printf "%T@ %p\n" | sort -n -r | head -n1 | sed "s/.* //")
+
+# Extract the kernel and initramfs
+dir=$(mktemp -d /tmp/wolfi-vm-XXXXXXXX)
+tar -C "$dir" -xf "$pkg"
+
+# Find the kernel and initramfs
+kernel=$(find "$dir"/boot -type f -name 'vmlinuz-*' -printf "%T@ %p\n" | sort -n -r | head -n1 | sed "s/.* //")
+initrd=$(find "$dir"/boot -type f -name "initramfs-*" | tail -n 1)
+
+# Run the VM in qemu-kvm
+# User: root
+# Password: wolfi
+# Use "poweroff" to shutdown from within the VM, or "killall qemu-system-x86_64" from outside the VM
+qemu-system-x86_64 -cpu host -enable-kvm -m 2048 -nographic -kernel $kernel -initrd $initrd -append "console=ttyS0"
