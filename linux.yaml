@@ -1,7 +1,7 @@
 package:
   name: linux
   version: "6.9.1"
-  epoch: 2
+  epoch: 9
   description: "the linux kernel"
   copyright:
     - license: GPL-2.0
@@ -9,6 +9,7 @@ package:
 environment:
   contents:
     packages:
+      - apko
       - bison
       - build-base
       - busybox
@@ -28,15 +29,39 @@ pipeline:
       expected-commit: b019fcc08127f9f9a50d19fe1ea1869607652838
 
   - runs: |
+      # Make a kernel
       # TODO: Much work to be done, tailoring a kernel config (or, more likely, a set of kernel configs)
       # TODO: But as a starting point, let's just build a sane default, accepting all defaults
       yes "" | make oldconfig
       echo "CONFIG_MODULE_SIG_KEY=certs/signing_key.x509" >> .config
       make -j $(grep -ci ^processor /proc/cpuinfo)
       mkdir -p ${{targets.destdir}}/boot
-      install -Dm644 .config ${{targets.destdir}}/boot/config-${{package.version}} 
-      install -Dm600 $(find . -type f -name bzImage -print -quit) ${{targets.destdir}}/boot/vmlinuz-${{package.version}}
-      cd ${{targets.destdir}}/boot && ln -sf vmlinuz-${{package.version}} vmlinuz && cd -
+      install -Dm644 .config ${{targets.destdir}}/boot/config-${{package.version}}-${{package.epoch}}
+      install -Dm600 $(find . -type f -name bzImage -print -quit) ${{targets.destdir}}/boot/vmlinuz-${{package.version}}-${{package.epoch}}
+      ( cd ${{targets.destdir}}/boot && ln -sf vmlinuz-${{package.version}}-${{package.epoch}} vmlinuz )
+      # Make an initramfs
+      cat <<EOF >base.yaml
+      contents:
+        keyring:
+          - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+        repositories:
+          - https://packages.wolfi.dev/os
+        packages:
+          - mount
+          - systemd
+          - wolfi-base
+      EOF
+      apko build-minirootfs base.yaml base.tar.gz
+      mkdir -p initramfs/rootfs
+      tar -C initramfs/rootfs -xvf base.tar.gz
+      ln -sf /usr/lib/systemd/systemd initramfs/rootfs/init
+      for i in debug-shell.service systemd-vconsole-setup.service systemd-logind.service; do
+        cp -f initramfs/rootfs/usr/lib/systemd/system/$i initramfs/rootfs/etc/systemd/system/
+      done
+      ( cd initramfs/rootfs && find . >../files )
+      ( cd initramfs/rootfs && cpio --format=newc -o ) <initramfs/files | gzip --to-stdout >initramfs-${{package.version}}-${{package.epoch}}.cpio.gz
+      install -Dm644 initramfs-${{package.version}}-${{package.epoch}}.cpio.gz ${{targets.destdir}}/boot/initramfs-${{package.version}}-${{package.epoch}}.cpio.gz
+      ( cd ${{targets.destdir}}/boot && ln -sf initramfs-${{package.version}}-${{package.epoch}}.cpio.gz initramfs )
 
 update:
   enabled: true
