@@ -1,6 +1,6 @@
 package:
   name: neon
-  version: "5493"
+  version: "5579"
   epoch: 0
   description: "Serverless Postgres. We separated storage and compute to offer autoscaling, branching, and bottomless storage."
   copyright:
@@ -43,7 +43,7 @@ pipeline:
     with:
       repository: https://github.com/neondatabase/neon
       tag: release-${{package.version}}
-      expected-commit: c2e7cb324f7281ac73f7bd2d12cc4115f7d0458a
+      expected-commit: b16e4f689f01d93c55c707b315a6b081f56b44e0
       recurse-submodules: true
 
   - runs: |
