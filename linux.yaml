@@ -1,7 +1,7 @@
 package:
   name: linux
-  version: "6.9.1"
-  epoch: 13
+  version: "6.9.3"
+  epoch: 1
   description: "the linux kernel"
   copyright:
     - license: GPL-2.0
@@ -26,7 +26,7 @@ pipeline:
     with:
       repository: https://github.com/gregkh/linux
       tag: v${{package.version}}
-      expected-commit: b019fcc08127f9f9a50d19fe1ea1869607652838
+      expected-commit: 1b4861e32e461b6fae14dc49ed0f1c7f20af5146
 
   - runs: |
       # Make a kernel

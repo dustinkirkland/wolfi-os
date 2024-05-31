@@ -21,4 +21,4 @@ initrd=$(find "$dir"/boot -type f -name "initramfs-*" | tail -n 1)
 # User: root
 # Password: wolfi
 # Use "poweroff" to shutdown from within the VM, or "killall qemu-system-x86_64" from outside the VM
-qemu-system-x86_64 -cpu host -enable-kvm -m 2048 -nographic -kernel $kernel -initrd $initrd -append "console=ttyS0"
+qemu-system-x86_64 -cpu host -enable-kvm -m 4096 -nographic -kernel $kernel -initrd $initrd -append "console=ttyS0"
