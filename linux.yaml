@@ -101,4 +101,3 @@ update:
     use-tag: true
     strip-prefix: v
     tag-filter: v
-
