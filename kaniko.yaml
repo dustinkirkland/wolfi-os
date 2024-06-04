@@ -1,7 +1,7 @@
 package:
   name: kaniko
-  version: 1.22.0
-  epoch: 1
+  version: 1.23.0
+  epoch: 0
   description: Build Container Images In Kubernetes
   copyright:
     - license: Apache-2.0
@@ -18,7 +18,7 @@ pipeline:
     with:
       repository: https://github.com/GoogleContainerTools/kaniko
       tag: v${{package.version}}
-      expected-commit: 02860eff083675db82c0c7f14cd19bd2ae662984
+      expected-commit: 98df8ebfc7834a720c83b81bd0b1d54f4f480477
 
   - uses: go/bump
     with:

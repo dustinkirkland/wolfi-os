@@ -1,6 +1,6 @@
 package:
   name: terragrunt
-  version: 0.56.2
+  version: 0.58.14
   epoch: 0
   description: Thin wrapper for Terraform providing extra tools
   copyright:
@@ -18,20 +18,23 @@ environment:
       - go
 
 pipeline:
-  - uses: fetch
+  - uses: git-checkout
     with:
-      expected-sha256: 24ba70749202887a3ea309ac3da9e31cc67efa37a0ff946cbb362d44fc840309
-      uri: https://github.com/gruntwork-io/terragrunt/archive/refs/tags/v${{package.version}}.tar.gz
-
-  - uses: go/bump
-    with:
-      deps: github.com/go-jose/go-jose/v3@v3.0.3 github.com/cloudflare/circl@v1.3.7 google.golang.org/protobuf@v1.33.0
+      expected-commit: 72889647cad710b8fee850cc6853e98be80ea6a5
+      repository: https://github.com/gruntwork-io/terragrunt
+      tag: v${{package.version}}
 
   - runs: |
       go build -v -o bin/terragrunt -ldflags "-s -w -X  github.com/gruntwork-io/go-commons/version.Version=v${{package.version}}"
-      install -Dm755 bin/terragrunt "${{targets.destdir}}"/usr/bin/terragrunt
+      install -Dm755 bin/terragrunt "${{targets.contextdir}}"/usr/bin/terragrunt
 
   - uses: strip
+
+test:
+  pipeline:
+    - name: Verify terragrunt
+      runs: |
+        terragrunt --version
 
 update:
   enabled: true

@@ -1,6 +1,6 @@
 package:
   name: prometheus-operator
-  version: 0.73.0
+  version: 0.74.0
   epoch: 0
   description: Prometheus Operator creates/configures/manages Prometheus clusters atop Kubernetes
   copyright:
@@ -22,7 +22,7 @@ pipeline:
     with:
       repository: https://github.com/prometheus-operator/prometheus-operator.git
       tag: v${{package.version}}
-      expected-commit: d70313bd17cf2a4b911222062608f793be146548
+      expected-commit: cd506c4fb584f40b46163926f01ba24a91f5baf5
 
   - uses: autoconf/make
     with:

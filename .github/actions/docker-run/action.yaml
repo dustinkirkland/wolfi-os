@@ -6,7 +6,7 @@ inputs:
     required: true
   image:
     description: "The image to use"
-    default: "ghcr.io/wolfi-dev/sdk:latest@sha256:b013f8bd16a19f1514d51b32d0c15970e83afe6c0c4845dc9c9a5083997b4965"
+    default: "ghcr.io/wolfi-dev/sdk:latest@sha256:32dbbda09149bdac1103c0740e7da8d8add0ac8ddcd9dd7bb12033068a1169e3"
     required: false
   workdir:
     description: "The images working directory"
@@ -39,7 +39,7 @@ runs:
           -e GOOGLE_GHA_CREDS_PATH=${GOOGLE_GHA_CREDS_PATH} \
           -i \
           ${{ inputs.opts }} \
-          ${{ inputs.image }} <<EOF
+          ${{ inputs.image }} <<"_END_DOCKER_RUN"
         set -e
         ${{ inputs.run }}
-        EOF
+        _END_DOCKER_RUN

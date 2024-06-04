@@ -1,6 +1,6 @@
 package:
   name: diffoscope
-  version: "263"
+  version: "269"
   epoch: 0
   description: "In-depth comparison of files, archives, and directories."
   copyright:
@@ -28,7 +28,7 @@ pipeline:
   - uses: fetch
     with:
       uri: https://files.pythonhosted.org/packages/source/d/diffoscope/diffoscope-${{package.version}}.tar.gz
-      expected-sha256: 9de909523729b9e700dcbdea362d23e09d8a31d71da499edd02ea4e3222b46bf
+      expected-sha256: 16163310efbf97bfef9e72595349453449f2ad4ffc67c88134805300899ebe02
 
   - runs: |
       python3 setup.py build

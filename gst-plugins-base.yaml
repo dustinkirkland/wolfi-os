@@ -1,6 +1,6 @@
 package:
   name: gst-plugins-base
-  version: 1.24.1
+  version: 1.24.4
   epoch: 0
   description: GStreamer streaming media framework base plug-ins
   copyright:
@@ -18,6 +18,7 @@ environment:
       - expat-dev
       - gdk-pixbuf
       - glib-dev
+      - glib-gir
       - gobject-introspection-dev
       - graphene-dev
       - gstreamer
@@ -39,7 +40,7 @@ environment:
 pipeline:
   - uses: fetch
     with:
-      expected-sha512: 579d99784ade21c969b6852acb9519c2a5d2e6374b62826b5b2c4293e72782c1be3806f5e6a7f6f5d9d02c3c770ca5f2327f80b7879152d2c0bede9f717bd9c7
+      expected-sha512: 9968b4de613aa7c2667e82cbfc8fbbbdd7ff72c250eeed7512a6150b165e91491f8ccaab23fd2e408ece4548e68e9061fa7735e2f4beed4f67a66bed94f0c692
       uri: https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${{package.version}}.tar.xz
 
   - runs: |

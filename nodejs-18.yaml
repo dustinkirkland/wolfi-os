@@ -1,6 +1,6 @@
 package:
   name: nodejs-18
-  version: 18.20.1
+  version: 18.20.3
   epoch: 0
   description: "JavaScript runtime built on V8 engine - LTS version"
   copyright:
@@ -9,6 +9,9 @@ package:
     provides:
       - nodejs=${{package.full-version}}
       - nodejs-lts=18
+  resources:
+    cpu: 33
+    memory: 64Gi
 
 environment:
   contents:
@@ -34,7 +37,7 @@ pipeline:
   - uses: fetch
     with:
       uri: https://nodejs.org/dist/v${{package.version}}/node-v${{package.version}}.tar.gz
-      expected-sha256: 7fb430d0b1256c22f26dd321070182ab943005bdb7b738facc6d9a82b1e04ed7
+      expected-sha256: f35c9b9923c7b2e9243e7e2d10cd9ae61fbd5b925df3debbb72d5a70dbff555d
 
   - name: Configure and build
     runs: |
@@ -89,5 +92,19 @@ update:
 
 test:
   pipeline:
-    - runs: |
-        node --version | grep ${{package.version}}
+    - name: Verify Node.js Installation
+      runs: |
+        node --version || exit 1
+    - name: Execute Basic JavaScript
+      runs: |
+        cat <<'EOF' > test.js
+        console.log('Hello, World!');
+        EOF
+        node test.js | grep 'Hello, World!' || exit 1
+    - name: Test International Number Formatting
+      runs: |
+        cat <<'EOF' > testIntl.js
+        console.log(new Intl.NumberFormat('en-EN').format(1234.56));
+        console.log(new Intl.NumberFormat('de-DE').format(1234.56));
+        EOF
+        node testIntl.js | grep '1,234.56' && node testIntl.js | grep '1.234,56' || exit 1

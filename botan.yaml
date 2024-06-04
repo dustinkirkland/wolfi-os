@@ -1,10 +1,13 @@
 package:
   name: botan
-  version: 3.3.0
+  version: 3.4.0
   epoch: 0
   description: "Cryptography Toolkit"
   copyright:
     - license: BSD-2-Clause
+  resources:
+    cpu: 16
+    memory: 8Gi
 
 environment:
   contents:
@@ -24,7 +27,7 @@ pipeline:
   - uses: git-checkout
     with:
       repository: https://github.com/randombit/botan
-      expected-commit: 9074b04c1303a24e2084f8325fa570a5ad4f2478
+      expected-commit: afd43c536ff96e85d45837caa6f99125483c160a
       tag: ${{package.version}}
 
   - name: Configure and build

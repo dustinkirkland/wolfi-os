@@ -1,15 +1,13 @@
-# When bumping the version check if the CVE/GHSA mitigations below can be removed.
 package:
   name: melange
-  version: 0.6.10
-  epoch: 1
+  version: 0.8.3
+  epoch: 0
   description: build APKs from source code
   copyright:
     - license: Apache-2.0
   dependencies:
     runtime:
       - bubblewrap
-      - busybox
       - ca-certificates-bundle
 
 environment:
@@ -22,13 +20,13 @@ environment:
 pipeline:
   - uses: git-checkout
     with:
-      expected-commit: dac40c70fcc53601aed6f579387a3b6439037b5c
+      expected-commit: c673c416e7a0b40086559bef8d0d4c77be01c834
       repository: https://github.com/chainguard-dev/melange
       tag: v${{package.version}}
 
   - runs: |
       make melange
-      install -m755 -D ./melange "${{targets.destdir}}"/usr/bin/melange
+      install -m755 -D ./melange "${{targets.contextdir}}"/usr/bin/melange
 
   - uses: strip
 
@@ -38,3 +36,18 @@ update:
     identifier: chainguard-dev/melange
     strip-prefix: v
     use-tag: true
+
+test:
+  environment:
+    contents:
+      packages:
+        - apk-tools
+  pipeline:
+    - runs: |
+        apk del wolfi-base busybox
+        melange version
+
+        # busybox is needed for the build, but we want to demonstrate
+        # that it's not needed at runtime.
+        # TODO(jason): Can't currently test this due to container inception nonsense that's just too crazy to justify.
+        # melange build example.yaml --arch=x86_64

@@ -1,6 +1,6 @@
 package:
   name: npm
-  version: 10.5.1
+  version: 10.8.1
   epoch: 0
   description: "the npm package manager for javascript, mainline"
   copyright:
@@ -17,12 +17,8 @@ pipeline:
   - uses: fetch
     with:
       uri: https://registry.npmjs.org/npm/-/npm-${{package.version}}.tgz
-      expected-sha512: 468cd9b86b966db843336b1184e48b2116f70cbca87fa4d1122d135b96f7c54101ae8a43843a841efd22023035cec2305ca81f22447c1af40c778a1e28a83d79
+      expected-sha512: 0e9d42e92bd2318408ed81eaff2da5f78baf23ee7d12a6eed44a6e2901d0f29d7ab715d1b918ade601f72e769a824d9a5c322383f22bbbda5dd396e79de2a077
       delete: true
-
-  - uses: patch
-    with:
-      patches: dont-check-for-last-version.patch
 
   - runs: |
       # Wrapper scripts written in Bash and CMD.
