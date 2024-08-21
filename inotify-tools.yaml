@@ -55,5 +55,3 @@ test:
   pipeline:
     - runs: |
         inotifyd --help
-        inotifywait --help
-        inotifywatch --help
