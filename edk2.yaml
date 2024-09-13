@@ -1,0 +1,71 @@
+# Generated from https://git.alpinelinux.org/aports/plain/community/edk2/APKBUILD
+package:
+  name: edk2
+  version: 0.0.202308
+  epoch: 0
+  description: EFI Development Kit II
+  copyright:
+    - license: BSD-2-Clause-Patent
+
+environment:
+  contents:
+    packages:
+      - bash
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+        #- iasl
+      - lsb-release-minimal
+      - nasm
+      - python3
+      - util-linux-dev
+      - util-linux-misc
+
+pipeline:
+  - uses: git-checkout
+    with:
+      tag: edk2-stable202408
+      expected-commit: b158dad150bf02879668f72ce306445250838201
+      repository: https://github.com/tianocore/edk2
+  - runs: |
+        export EDK2_TOOLCHAIN=GCC5
+        . ./edksetup.sh
+        python3 -m venv .venv
+        source .venv/bin/activate
+        pip install -r pip-requirements.txt --upgrade
+        pip install --upgrade edk2-basetools
+        stuart_setup -c .pytool/CISettings.py
+        make -j $(nproc) -C ./BaseTools
+        build -a AARCH64 -t GCC5 -p ArmVirtPkg/ArmVirtQemu.dsc \
+          --pcd PcdFirmwareVendor=L"$(lsb_release -is) distribution of EDK II\\0" \
+          --pcd PcdFirmwareVersionString=L"$(lsb_release -rs)\\0" \
+          --pcd PcdFirmwareReleaseDateString=L"$(date "+%Y-%m-%d")\\0" \
+          -DTPM2_ENABLE=TRUE \
+          -DTPM2_CONFIG_ENABLE=TRUE \
+          -DCAVIUM_ERRATUM_27456=TRUE \
+          -DBUILD_SHELL=FALSE \
+          -DSECURE_BOOT_ENABLE=TRUE \
+          -b RELEASE
+
+        #  - uses: fetch
+        #    with:
+        #      expected-sha256: 9fda3b9a78343ab2be6f06ce6396536e7e065abac29b47c8eb2e42cbb4c4f00b
+        #      uri: https://github.com/MIPI-Alliance/public-mipi-sys-t/archive/370b5944c046bab043dd8b133727b2135af7747a.tar.gz
+        #
+        #  - uses: fetch
+        #    with:
+        #      expected-sha256: eb1ab04781474360f77c318ab89d8c5a03abc38e63d65a603cabbf1b00a1dc90
+        #      uri: https://www.openssl.org/source/openssl-3.0.9.tar.gz
+
+        #  - uses: fetch
+        #    with:
+        #      expected-sha256: 21130ce885d35c1fe73fc1e1bf2244178167e05c6747cad5f450cc991714c746
+        #      uri: http://www.jhauser.us/arithmetic/SoftFloat-3e.zip
+
+  - uses: autoconf/configure
+
+  - uses: autoconf/make
+
+  - uses: autoconf/make-install
+
+  - uses: strip
