@@ -1,0 +1,68 @@
+package:
+  name: wlroots
+  version: 0.18.0
+  epoch: 4
+  description: "A modular Wayland compositor library"
+  copyright:
+    - license: MIT
+
+environment:
+  contents:
+    packages:
+      - build-base
+      - ca-certificates-bundle
+      - cmake
+      - eudev
+      - eudev-libs
+      - glibc-locale-gbm
+      - glslang-dev
+      - hwdata-dev
+      - lcms2-dev
+      - libdrm-dev
+      - libinput
+      - libxkbcommon-dev
+      - libxfixes-dev
+      - libxxf86vm-dev
+      - mesa-egl
+      - mesa-gbm
+      - mesa-gles
+      - meson
+      - pixman-dev
+      - pkgconf-dev
+      - vulkan-headers
+      - vulkan-loader
+      - wayland
+      - wayland-dev
+      - wayland-libs-client
+      - wayland-libs-server
+      - wayland-protocols
+      - wolfi-base
+      - xcb-util-renderutil-dev
+
+pipeline:
+  - uses: git-checkout
+    with:
+      repository: https://gitlab.freedesktop.org/wlroots/wlroots
+      expected-commit: 4666996b2a34b53899aedafcd3586fb1c7a16af6
+      tag: ${{package.version}}
+
+  - runs: |
+      meson setup --prefix=/usr build/
+      ninja -C build/
+      DESTDIR="${{targets.destdir}}" ninja -C build install
+      ln -sf wlroots-$v.pc ${{targets.destdir}}/usr/lib/pkgconfig/wlroots.pc
+
+  - uses: strip
+
+update:
+  enabled: true
+
+test:
+  environment:
+    contents:
+      packages:
+        - pkgconf
+        - wlroots
+  pipeline:
+    - runs: |
+        pkg-config --libs wlroots | grep /usr/lib
