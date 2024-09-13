@@ -36,7 +36,7 @@ pipeline:
         pip install --upgrade edk2-basetools
         stuart_setup -c .pytool/CISettings.py
         make -j $(nproc) -C ./BaseTools
-        build -a AARCH64 -t GCC5 -p ArmVirtPkg/ArmVirtQemu.dsc \
+        build -j $(nproc) -a AARCH64 -t GCC5 -p ArmVirtPkg/ArmVirtQemu.dsc \
           --pcd PcdFirmwareVendor=L"$(lsb_release -is) distribution of EDK II\\0" \
           --pcd PcdFirmwareVersionString=L"$(lsb_release -rs)\\0" \
           --pcd PcdFirmwareReleaseDateString=L"$(date "+%Y-%m-%d")\\0" \
