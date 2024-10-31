@@ -48,3 +48,4 @@ test:
     - runs: |
         vterm-dump --version
         vterm-dump --help
+    - uses: test/pkgconf

@@ -52,6 +52,9 @@ subpackages:
       runtime:
         - libavif
     description: libavif dev
+    test:
+      pipeline:
+        - uses: test/pkgconf
 
   - name: libavif-apps
     pipeline:
